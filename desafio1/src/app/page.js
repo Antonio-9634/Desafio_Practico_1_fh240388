@@ -1,95 +1,94 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import React, { useState } from "react";
+import PlanoRestaurante from "../components/PlanoRestaurante";
+import ResumenReserva from "../components/ResumenReserva";
+import SelectorZona from "../components/SelectorZona";
+import styles from "../styles/page.module.css";
+
+const Page = () => {
+  const [zonaSeleccionada, setZonaSeleccionada] = useState("Terraza");
+  const [reserva, setReserva] = useState(null); // Estado para manejar la reserva
+
+  const [mesas, setMesas] = useState({
+    Terraza: [
+      { id: 1, ocupada: false },
+      { id: 2, ocupada: true },
+      { id: 3, ocupada: false },
+    ],
+    Interior: [
+      { id: 4, ocupada: false },
+      { id: 5, ocupada: true },
+      { id: 6, ocupada: false },
+    ],
+    VIP: [
+      { id: 7, ocupada: false },
+      { id: 8, ocupada: true },
+      { id: 9, ocupada: false },
+    ],
+  });
+
+  const reservarMesa = (id) => {
+    const mesa = mesas[zonaSeleccionada].find((mesa) => mesa.id === id);
+
+    if (!mesa.ocupada) {
+      // Si la mesa está desocupada, la reservamos
+      setMesas((prevMesas) => {
+        const nuevasMesas = { ...prevMesas };
+        nuevasMesas[zonaSeleccionada] = nuevasMesas[zonaSeleccionada].map((mesa) =>
+          mesa.id === id ? { ...mesa, ocupada: true } : mesa
+        );
+        return nuevasMesas;
+      });
+      // Actualizamos el estado de reserva
+      const nuevaReserva = {
+        mesaId: id,
+        zona: zonaSeleccionada,
+        personas: 4, // Aquí puedes cambiar la cantidad de personas
+      };
+      setReserva(nuevaReserva); // Guardamos la reserva
+    }
+  };
+
+  const liberarMesa = (id) => {
+    // Liberar una mesa (solo si está ocupada)
+    setMesas((prevMesas) => {
+      const nuevasMesas = { ...prevMesas };
+      nuevasMesas[zonaSeleccionada] = nuevasMesas[zonaSeleccionada].map((mesa) =>
+        mesa.id === id ? { ...mesa, ocupada: false } : mesa
+      );
+      return nuevasMesas;
+    });
+    setReserva(null); // Limpiamos la reserva al liberar la mesa
+  };
+
+  const cambiarZona = (zona) => {
+    setZonaSeleccionada(zona);
+    setReserva(null); // Si deseas resetear la reserva al cambiar de zona
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className={styles.container}>
+      <SelectorZona zonaSeleccionada={zonaSeleccionada} cambiarZona={cambiarZona} />
+      <PlanoRestaurante mesas={mesas[zonaSeleccionada]} onReservar={reservarMesa} zona={zonaSeleccionada} />
+      
+      {/* Mostramos el resumen de la reserva solo si hay una reserva activa */}
+      {reserva && <ResumenReserva reserva={reserva} />}
+      
+      {/* Mostrar siempre el botón para liberar mesas ocupadas */}
+      <div className={styles.botonLiberarContainer}>
+        {mesas[zonaSeleccionada].map((mesa) =>
+          mesa.ocupada ? (
+            <div key={mesa.id} className={styles.botonLiberar}>
+              <button onClick={() => liberarMesa(mesa.id)}>
+                Liberar Mesa {mesa.id}
+              </button>
+            </div>
+          ) : null
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default Page;

@@ -8,8 +8,7 @@ import styles from "../styles/page.module.css";
 
 const Page = () => {
   const [zonaSeleccionada, setZonaSeleccionada] = useState("Terraza");
-  const [reserva, setReserva] = useState(null); // Estado para manejar la reserva
-
+  const [reserva, setReserva] = useState(null); 
   const [mesas, setMesas] = useState({
     Terraza: [
       { id: 1, ocupada: false },
@@ -32,7 +31,6 @@ const Page = () => {
     const mesa = mesas[zonaSeleccionada].find((mesa) => mesa.id === id);
 
     if (!mesa.ocupada) {
-      // Si la mesa está desocupada, la reservamos
       setMesas((prevMesas) => {
         const nuevasMesas = { ...prevMesas };
         nuevasMesas[zonaSeleccionada] = nuevasMesas[zonaSeleccionada].map((mesa) =>
@@ -40,18 +38,16 @@ const Page = () => {
         );
         return nuevasMesas;
       });
-      // Actualizamos el estado de reserva
       const nuevaReserva = {
         mesaId: id,
         zona: zonaSeleccionada,
-        personas: 4, // Aquí puedes cambiar la cantidad de personas
+        personas: 4, 
       };
-      setReserva(nuevaReserva); // Guardamos la reserva
+      setReserva(nuevaReserva); 
     }
   };
 
   const liberarMesa = (id) => {
-    // Liberar una mesa (solo si está ocupada)
     setMesas((prevMesas) => {
       const nuevasMesas = { ...prevMesas };
       nuevasMesas[zonaSeleccionada] = nuevasMesas[zonaSeleccionada].map((mesa) =>
@@ -59,12 +55,12 @@ const Page = () => {
       );
       return nuevasMesas;
     });
-    setReserva(null); // Limpiamos la reserva al liberar la mesa
+    setReserva(null); 
   };
 
   const cambiarZona = (zona) => {
     setZonaSeleccionada(zona);
-    setReserva(null); // Si deseas resetear la reserva al cambiar de zona
+    setReserva(null); 
   };
 
   return (
